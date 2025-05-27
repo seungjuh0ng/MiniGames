@@ -268,6 +268,8 @@ function Game2048() {
     let touchEndX = 0;
     let touchEndY = 0;
     let isTouching = false;
+    const MIN_SWIPE_DISTANCE = 30; // 최소 스와이프 거리
+    const SWIPE_THRESHOLD = 0.5; // 스와이프 각도 임계값 (45도)
 
     const handleTouchStart = (e: TouchEvent) => {
       if (moving || gameOver) return;
@@ -275,31 +277,53 @@ function Game2048() {
       touchStartX = e.touches[0].clientX;
       touchStartY = e.touches[0].clientY;
     };
+
     const handleTouchMove = (e: TouchEvent) => {
       if (!isTouching) return;
       touchEndX = e.touches[0].clientX;
       touchEndY = e.touches[0].clientY;
     };
+
     const handleTouchEnd = () => {
       if (!isTouching) return;
+      
       const dx = touchEndX - touchStartX;
       const dy = touchEndY - touchStartY;
-      if (Math.abs(dx) < 30 && Math.abs(dy) < 30) return; // 최소 스와이프 거리
-      let direction = null;
-      if (Math.abs(dx) > Math.abs(dy)) {
-        direction = dx > 0 ? "right" : "left";
-      } else {
-        direction = dy > 0 ? "down" : "up";
+      const distance = Math.sqrt(dx * dx + dy * dy);
+
+      // 최소 스와이프 거리 체크
+      if (distance < MIN_SWIPE_DISTANCE) {
+        isTouching = false;
+        return;
       }
-      moveTiles(direction);
+
+      // 스와이프 각도 계산
+      const angle = Math.abs(Math.atan2(dy, dx));
+      let direction: 'up' | 'down' | 'left' | 'right' | null = null;
+
+      // 수평 스와이프
+      if (angle < SWIPE_THRESHOLD || angle > Math.PI - SWIPE_THRESHOLD) {
+        direction = dx > 0 ? 'right' : 'left';
+      }
+      // 수직 스와이프
+      else if (angle > Math.PI/2 - SWIPE_THRESHOLD && angle < Math.PI/2 + SWIPE_THRESHOLD) {
+        direction = dy > 0 ? 'down' : 'up';
+      }
+
+      if (direction) {
+        moveTiles(direction);
+      }
+      
       isTouching = false;
     };
+
     const board = document.getElementById("game-board-touch-area");
     if (board) {
-      board.addEventListener("touchstart", handleTouchStart, { passive: false });
-      board.addEventListener("touchmove", handleTouchMove, { passive: false });
-      board.addEventListener("touchend", handleTouchEnd, { passive: false });
+      board.addEventListener("touchstart", handleTouchStart, { passive: true });
+      board.addEventListener("touchmove", handleTouchMove, { passive: true });
+      board.addEventListener("touchend", handleTouchEnd, { passive: true });
     }
+
     return () => {
       if (board) {
         board.removeEventListener("touchstart", handleTouchStart);
