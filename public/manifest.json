@@ -1,0 +1,17 @@
+{
+  "name": "Mini Games",
+  "short_name": "Mini Games",
+  "description": "Enjoy a variety of mini games in one place. Play for free!",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#2c3e50",
+  "icons": [
+    {
+      "src": "/thumbnail_games.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
